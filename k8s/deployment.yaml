@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-developer-lab
+  labels:
+    app: backend-developer-lab
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: backend-developer-lab
+  template:
+    metadata:
+      labels:
+        app: backend-developer-lab
+    spec:
+      containers:
+        - name: api
+          image: ghcr.io/your-org/backend-developer-lab:latest
+          ports:
+            - containerPort: 3000
+          env:
+            - name: NODE_ENV
+              value: production
+            - name: PORT
+              value: "3000"
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: backend-lab-secrets
+                  key: database_url
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: backend-lab-secrets
+                  key: jwt_secret
+          readinessProbe:
+            httpGet:
+              path: /cases/01-health
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /cases/01-health
+              port: 3000
+            initialDelaySeconds: 15
+            periodSeconds: 20

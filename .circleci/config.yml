@@ -1,0 +1,25 @@
+version: 2.1
+
+jobs:
+  build-and-test:
+    docker:
+      - image: cimg/node:20.11
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: npm ci
+      - run:
+          name: Type check
+          command: npm run lint
+      - run:
+          name: Run tests
+          command: npm run test
+      - run:
+          name: Build
+          command: npm run build
+
+workflows:
+  build-test-workflow:
+    jobs:
+      - build-and-test

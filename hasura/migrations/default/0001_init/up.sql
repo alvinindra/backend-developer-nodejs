@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS public.orders (
+  id SERIAL PRIMARY KEY,
+  customer_id TEXT NOT NULL,
+  amount NUMERIC NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);

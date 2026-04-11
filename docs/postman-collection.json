@@ -1,0 +1,80 @@
+{
+  "info": {
+    "name": "Backend Developer Study Lab",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "01 Health",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/cases/01-health",
+          "host": ["{{baseUrl}}"],
+          "path": ["cases", "01-health"]
+        }
+      }
+    },
+    {
+      "name": "07 Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "content-type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"dev-user\",\n  \"role\": \"developer\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/cases/07-auth/login",
+          "host": ["{{baseUrl}}"],
+          "path": ["cases", "07-auth", "login"]
+        }
+      }
+    },
+    {
+      "name": "09b Idempotent Payment",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "content-type", "value": "application/json" },
+          { "key": "idempotency-key", "value": "order-1001" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"amount\": 250,\n  \"currency\": \"USD\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/cases/09b-idempotency/payment",
+          "host": ["{{baseUrl}}"],
+          "path": ["cases", "09b-idempotency", "payment"]
+        }
+      }
+    },
+    {
+      "name": "15 Generate Signature",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "content-type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"action\": \"push\",\n  \"branch\": \"main\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/cases/15-ci-cd-webhook/signature/generate",
+          "host": ["{{baseUrl}}"],
+          "path": ["cases", "15-ci-cd-webhook", "signature", "generate"]
+        }
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    }
+  ]
+}

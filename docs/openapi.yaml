@@ -1,0 +1,2457 @@
+openapi: 3.0.3
+info:
+  title: Backend Developer Node.js Study Lab API
+  version: 1.1.0
+  description: >-
+    Complete OpenAPI reference for the backend study cases.
+    Includes request body schemas, request examples, and response examples
+    for both success and common error outcomes.
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+tags:
+  - name: Documentation
+  - name: Foundations
+  - name: Data and Platform
+  - name: Distributed Systems
+  - name: Product and Observability
+  - name: Delivery and Architecture
+  - name: Reliability and Domain
+
+paths:
+  /docs/study-cases:
+    get:
+      tags: [Documentation]
+      summary: Get study case catalog JSON
+      operationId: getStudyCasesDocs
+      responses:
+        "200":
+          description: Study case inventory with docs links
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  routes:
+                    type: array
+                    items:
+                      type: string
+                  details:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/StudyCase"
+                  openApi:
+                    type: string
+                  openApiUi:
+                    type: string
+              examples:
+                success:
+                  value:
+                    message: Open README.md and docs/study-cases.md in the project folder for full guide
+                    routes:
+                      - /cases/01-health
+                      - /cases/02-typescript-crud
+                      - /cases/17-event-sourcing-cqrs
+                    details:
+                      - id: "01"
+                        route: /cases/01-health
+                        title: Health and readiness
+                        focus: Service uptime, request IDs, production-style probes
+                      - id: "17"
+                        route: /cases/17-event-sourcing-cqrs
+                        title: Event sourcing and CQRS
+                        focus: Command handling, append-only events, and projection rebuild
+                    openApi: /docs/openapi.yaml
+                    openApiUi: /docs/openapi
+
+  /cases/01-health:
+    get:
+      tags: [Foundations]
+      summary: Health and readiness probe
+      operationId: getCase01Health
+      responses:
+        "200":
+          description: Health payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                success:
+                  value:
+                    case: 01-health
+                    status: ok
+                    requestId: 4c9654f6-b5d9-4718-9d9c-a334f31d2ef4
+                    uptimeSeconds: 51.203
+                    timestamp: 2026-04-11T09:00:18.201Z
+
+  /cases/02-typescript-crud:
+    get:
+      tags: [Foundations]
+      summary: List all in-memory tasks
+      operationId: listCase02Tasks
+      responses:
+        "200":
+          description: Current task list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                success:
+                  value:
+                    case: 02-typescript-crud
+                    count: 1
+                    data:
+                      - id: 1d7b50aa-335a-42bf-bfba-af6c6a3f5ebd
+                        createdAt: 2026-04-11T09:02:02.010Z
+                        title: Study TypeScript backend flow
+                        description: created from phase runner
+                        status: todo
+    post:
+      tags: [Foundations]
+      summary: Create a new task
+      operationId: createCase02Task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaskCreate"
+            examples:
+              createTask:
+                value:
+                  title: Study TypeScript backend flow
+                  description: created from phase runner
+                  status: todo
+      responses:
+        "201":
+          description: Created task
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                created:
+                  value:
+                    id: 1d7b50aa-335a-42bf-bfba-af6c6a3f5ebd
+                    createdAt: 2026-04-11T09:02:02.010Z
+                    title: Study TypeScript backend flow
+                    description: created from phase runner
+                    status: todo
+        "400":
+          description: Validation failure
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalidPayload:
+                  value:
+                    error:
+                      fieldErrors:
+                        title:
+                          - String must contain at least 3 character(s)
+                      formErrors: []
+
+  /cases/02-typescript-crud/{id}:
+    patch:
+      tags: [Foundations]
+      summary: Update task fields by id
+      operationId: updateCase02Task
+      parameters:
+        - $ref: "#/components/parameters/TaskId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaskUpdate"
+            examples:
+              updateTask:
+                value:
+                  status: done
+                  description: Finished the CRUD walkthrough
+      responses:
+        "200":
+          description: Updated task
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                updated:
+                  value:
+                    id: 1d7b50aa-335a-42bf-bfba-af6c6a3f5ebd
+                    createdAt: 2026-04-11T09:02:02.010Z
+                    title: Study TypeScript backend flow
+                    description: Finished the CRUD walkthrough
+                    status: done
+        "400":
+          description: Validation failure
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalidStatus:
+                  value:
+                    error:
+                      fieldErrors:
+                        status:
+                          - Invalid enum value. Expected 'todo' | 'in_progress' | 'done'
+                      formErrors: []
+        "404":
+          description: Task id not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                notFound:
+                  value:
+                    error: Task not found
+    delete:
+      tags: [Foundations]
+      summary: Delete a task by id
+      operationId: deleteCase02Task
+      parameters:
+        - $ref: "#/components/parameters/TaskId"
+      responses:
+        "200":
+          description: Removed task
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                removed:
+                  value:
+                    removed:
+                      id: 1d7b50aa-335a-42bf-bfba-af6c6a3f5ebd
+                      createdAt: 2026-04-11T09:02:02.010Z
+                      title: Study TypeScript backend flow
+                      description: created from phase runner
+                      status: todo
+        "404":
+          description: Task id not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                notFound:
+                  value:
+                    error: Task not found
+
+  /cases/03-graphql:
+    post:
+      tags: [Foundations]
+      summary: Execute GraphQL query or mutation
+      operationId: executeCase03Graphql
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GraphqlRequest"
+            examples:
+              queryBooks:
+                value:
+                  query: "{ books { id title author } }"
+              addBook:
+                value:
+                  query: 'mutation { addBook(title: "Clean Code", author: "Robert C. Martin") { id title author } }'
+      responses:
+        "200":
+          description: GraphQL execution result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                booksQuery:
+                  value:
+                    data:
+                      books:
+                        - id: "1"
+                          title: Designing Data-Intensive Applications
+                          author: Martin Kleppmann
+                        - id: "2"
+                          title: Clean Architecture
+                          author: Robert C. Martin
+
+  /cases/04-postgres/setup:
+    post:
+      tags: [Data and Platform]
+      summary: Create study_users table and index
+      operationId: setupCase04Postgres
+      responses:
+        "200":
+          description: Table ready
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                success:
+                  value:
+                    case: 04-postgres
+                    message: study_users table ready
+        "500":
+          description: Database setup error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                setupFailed:
+                  value:
+                    case: 04-postgres
+                    error: Could not connect to Postgres
+
+  /cases/04-postgres/users:
+    post:
+      tags: [Data and Platform]
+      summary: Insert a user row
+      operationId: createCase04User
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateUserRequest"
+            examples:
+              createUser:
+                value:
+                  email: learner@example.com
+                  name: Backend Learner
+      responses:
+        "201":
+          description: User inserted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                created:
+                  value:
+                    id: 14
+                    email: learner@example.com
+                    name: Backend Learner
+                    created_at: 2026-04-11T09:12:00.100Z
+        "400":
+          description: Validation failure
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalidEmail:
+                  value:
+                    error:
+                      fieldErrors:
+                        email:
+                          - Invalid email
+                      formErrors: []
+        "500":
+          description: Insert failure
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                insertFailed:
+                  value:
+                    error: duplicate key value violates unique constraint "study_users_email_key"
+    get:
+      tags: [Data and Platform]
+      summary: List recent users
+      operationId: listCase04Users
+      responses:
+        "200":
+          description: User rows
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                success:
+                  value:
+                    case: 04-postgres
+                    count: 2
+                    data:
+                      - id: 14
+                        email: learner@example.com
+                        name: Backend Learner
+                        created_at: 2026-04-11T09:12:00.100Z
+                      - id: 13
+                        email: demo@example.com
+                        name: Demo User
+                        created_at: 2026-04-11T09:10:00.100Z
+        "500":
+          description: Query failure
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                queryFailed:
+                  value:
+                    error: Query failed
+
+  /cases/04b-postgres-transactions/setup:
+    post:
+      tags: [Data and Platform]
+      summary: Prepare wallet tables and seed balances
+      operationId: setupCase04bTransactions
+      responses:
+        "200":
+          description: Wallet tables ready
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                success:
+                  value:
+                    case: 04b-postgres-transactions
+                    message: wallet tables ready
+        "500":
+          description: Setup failure
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                setupFailed:
+                  value:
+                    error: Setup failed
+
+  /cases/04b-postgres-transactions/transfer:
+    post:
+      tags: [Data and Platform]
+      summary: Perform ACID wallet transfer
+      operationId: transferCase04bFunds
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TransferRequest"
+            examples:
+              transfer:
+                value:
+                  fromOwner: alice
+                  toOwner: bob
+                  amount: 25
+      responses:
+        "200":
+          description: Transfer succeeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                success:
+                  value:
+                    case: 04b-postgres-transactions
+                    transferred:
+                      fromOwner: alice
+                      toOwner: bob
+                      amount: 25
+        "400":
+          description: Invalid transfer or business-rule failure
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                insufficientBalance:
+                  value:
+                    error: Insufficient balance
+                invalidInput:
+                  value:
+                    error: Invalid transfer input
+
+  /cases/04b-postgres-transactions/balances:
+    get:
+      tags: [Data and Platform]
+      summary: Get current wallet balances
+      operationId: getCase04bBalances
+      responses:
+        "200":
+          description: Wallet balances
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                success:
+                  value:
+                    case: 04b-postgres-transactions
+                    data:
+                      - owner: alice
+                        balance: "975"
+                      - owner: bob
+                        balance: "525"
+        "500":
+          description: Read failure
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                readFailed:
+                  value:
+                    error: Read failed
+
+  /cases/05-timescale/setup:
+    post:
+      tags: [Data and Platform]
+      summary: Setup Timescale extension and hypertable
+      operationId: setupCase05Timescale
+      responses:
+        "200":
+          description: Hypertable created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                success:
+                  value:
+                    case: 05-timescale
+                    message: hypertable ready
+        "500":
+          description: Setup failure
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                setupFailed:
+                  value:
+                    error: Timescale setup failed
+
+  /cases/05-timescale/metrics:
+    post:
+      tags: [Data and Platform]
+      summary: Ingest service metric point
+      operationId: ingestCase05Metric
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MetricIngestRequest"
+            examples:
+              ingestMetric:
+                value:
+                  service: api
+                  value: 123.4
+      responses:
+        "201":
+          description: Metric inserted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                created:
+                  value:
+                    case: 05-timescale
+                    ingested:
+                      service: api
+                      value: 123.4
+        "400":
+          description: Validation failure
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalidPayload:
+                  value:
+                    error:
+                      fieldErrors:
+                        service:
+                          - String must contain at least 2 character(s)
+                      formErrors: []
+        "500":
+          description: Insert failure
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                insertFailed:
+                  value:
+                    error: Insert metric failed
+
+  /cases/05-timescale/query:
+    get:
+      tags: [Data and Platform]
+      summary: Query aggregated metrics
+      operationId: queryCase05Metrics
+      parameters:
+        - in: query
+          name: service
+          required: false
+          schema:
+            type: string
+            default: api
+          description: Service name filter
+          example: api
+        - in: query
+          name: minutes
+          required: false
+          schema:
+            type: integer
+            default: 60
+            minimum: 1
+          description: Sliding time window in minutes
+          example: 60
+      responses:
+        "200":
+          description: Aggregated metric buckets
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                success:
+                  value:
+                    case: 05-timescale
+                    service: api
+                    minutes: 60
+                    data:
+                      - bucket: 2026-04-11T09:10:00.000Z
+                        avg_value: 121.2
+                      - bucket: 2026-04-11T09:05:00.000Z
+                        avg_value: 117.4
+        "500":
+          description: Query failure
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                queryFailed:
+                  value:
+                    error: Timescale query failed
+
+  /cases/06-hasura/action/greet:
+    post:
+      tags: [Data and Platform]
+      summary: Hasura action webhook sample
+      operationId: runCase06HasuraAction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+            examples:
+              hasuraAction:
+                value:
+                  session_variables:
+                    x-hasura-role: developer
+                  input:
+                    name: backend learner
+      responses:
+        "200":
+          description: Action response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                success:
+                  value:
+                    case: 06-hasura
+                    message: Hello backend learner, request accepted for role developer
+
+  /cases/06-hasura/event/order-created:
+    post:
+      tags: [Data and Platform]
+      summary: Hasura event-trigger webhook sample
+      operationId: runCase06HasuraEvent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+            examples:
+              hasuraEvent:
+                value:
+                  event:
+                    id: 9f0c7647-798e-42f5-a56a-7f80bc10d2dc
+                    data:
+                      new:
+                        id: ord_123
+                        amount: 99
+                      old: null
+      responses:
+        "200":
+          description: Event callback ack
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                success:
+                  value:
+                    case: 06-hasura
+                    received: true
+                    eventId: 9f0c7647-798e-42f5-a56a-7f80bc10d2dc
+                    table: insert
+
+  /cases/07-auth/login:
+    post:
+      tags: [Foundations]
+      summary: Sign a JWT for a user role
+      operationId: loginCase07
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuthLogin"
+            examples:
+              developerLogin:
+                value:
+                  username: dev-user
+                  role: developer
+              adminLogin:
+                value:
+                  username: platform-admin
+                  role: admin
+      responses:
+        "200":
+          description: JWT issued
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                success:
+                  value:
+                    case: 07-auth
+                    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.sample
+                    user:
+                      username: dev-user
+                      role: developer
+        "400":
+          description: Validation failure
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalidRole:
+                  value:
+                    error:
+                      fieldErrors:
+                        role:
+                          - Invalid enum value. Expected 'admin' | 'developer' | 'viewer'
+                      formErrors: []
+
+  /cases/07-auth/profile:
+    get:
+      tags: [Foundations]
+      summary: Read authenticated profile claims
+      operationId: getCase07Profile
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Authenticated user profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                success:
+                  value:
+                    case: 07-auth
+                    profile:
+                      sub: dev-user
+                      role: developer
+                      iss: backend-study-lab
+                      aud: backend-study-lab-clients
+                      iat: 1775899800
+                      exp: 1775903400
+                    requestId: 74efbf2a-9613-4462-9c75-0c8de5fa6d02
+        "401":
+          description: Missing/invalid bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+
+  /cases/07-auth/admin:
+    get:
+      tags: [Foundations]
+      summary: Admin-only authorization check
+      operationId: getCase07Admin
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Access granted for admin role
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                success:
+                  value:
+                    case: 07-auth
+                    ok: true
+                    message: Welcome admin platform-admin
+        "401":
+          description: Missing/invalid bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+        "403":
+          description: Authenticated but missing role
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                forbidden:
+                  value:
+                    error: Forbidden
+
+  /cases/08-microservices/setup:
+    post:
+      tags: [Distributed Systems]
+      summary: Setup orders and outbox tables
+      operationId: setupCase08
+      responses:
+        "200":
+          description: Tables ready
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                success:
+                  value:
+                    case: 08-microservices
+                    message: service_orders and outbox_events are ready
+        "500":
+          description: Setup failure
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                setupFailed:
+                  value:
+                    error: Setup failed
+
+  /cases/08-microservices/orders:
+    post:
+      tags: [Distributed Systems]
+      summary: Create order and outbox event in one transaction
+      operationId: createCase08Order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                customerId:
+                  type: string
+                amount:
+                  type: number
+                  exclusiveMinimum: 0
+              required: [customerId, amount]
+            examples:
+              createOrder:
+                value:
+                  customerId: user-1
+                  amount: 299
+      responses:
+        "201":
+          description: Order accepted and event queued
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                created:
+                  value:
+                    case: 08-microservices
+                    orderId: 96e356af-e077-4a5e-9abf-8fdb8f6ef7cc
+                    outboxEventId: 72c49fe9-7d63-49bc-8ca9-bdcbd12fcf75
+        "400":
+          description: Invalid amount
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalidAmount:
+                  value:
+                    error: amount must be greater than 0
+        "500":
+          description: Order create failure
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                createFailed:
+                  value:
+                    error: Order create failed
+
+  /cases/08-microservices/process-outbox:
+    post:
+      tags: [Distributed Systems]
+      summary: Process next pending outbox event
+      operationId: processCase08Outbox
+      responses:
+        "200":
+          description: Processing result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                processed:
+                  value:
+                    case: 08-microservices
+                    processed: true
+                    eventId: 72c49fe9-7d63-49bc-8ca9-bdcbd12fcf75
+                emptyQueue:
+                  value:
+                    case: 08-microservices
+                    processed: false
+        "500":
+          description: Outbox processing failure
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                processFailed:
+                  value:
+                    error: Outbox processing failed
+
+  /cases/08-microservices/state:
+    get:
+      tags: [Distributed Systems]
+      summary: Read order and outbox state
+      operationId: getCase08State
+      responses:
+        "200":
+          description: Current order and outbox records
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                success:
+                  value:
+                    case: 08-microservices
+                    orders:
+                      - id: 96e356af-e077-4a5e-9abf-8fdb8f6ef7cc
+                        customerId: user-1
+                        amount: 299
+                        status: processed
+                        createdAt: 2026-04-11T09:22:00.000Z
+                    outbox:
+                      - id: 72c49fe9-7d63-49bc-8ca9-bdcbd12fcf75
+                        eventType: order.created
+                        payload:
+                          id: 96e356af-e077-4a5e-9abf-8fdb8f6ef7cc
+                          customerId: user-1
+                          amount: 299
+                          status: created
+                        published: true
+                        createdAt: 2026-04-11T09:22:00.000Z
+                        publishedAt: 2026-04-11T09:22:01.000Z
+        "500":
+          description: State query failure
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                stateFailed:
+                  value:
+                    error: State query failed
+
+  /cases/08b-service-boundary/checkout:
+    post:
+      tags: [Distributed Systems]
+      summary: Reserve inventory then authorize payment
+      operationId: checkoutCase08b
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CheckoutRequest"
+            examples:
+              checkout:
+                value:
+                  sku: keyboard
+                  quantity: 1
+                  amount: 120
+      responses:
+        "201":
+          description: Checkout completed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                created:
+                  value:
+                    case: 08b-service-boundary
+                    status: order_confirmed
+                    sku: keyboard
+                    quantity: 1
+                    amount: 120
+        "400":
+          description: Invalid checkout input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalidPayload:
+                  value:
+                    error: Invalid checkout payload
+        "402":
+          description: Payment denied and reservation rolled back
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                paymentFailed:
+                  value:
+                    case: 08b-service-boundary
+                    step: payment
+                    authorized: false
+                    reason: amount exceeds authorization threshold
+        "409":
+          description: Inventory could not reserve requested quantity
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                inventoryConflict:
+                  value:
+                    case: 08b-service-boundary
+                    step: inventory
+                    reserved: false
+                    reason: insufficient stock (0)
+
+  /cases/08b-service-boundary/inventory:
+    get:
+      tags: [Distributed Systems]
+      summary: Get in-memory inventory snapshot
+      operationId: getCase08bInventory
+      responses:
+        "200":
+          description: Inventory data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                success:
+                  value:
+                    case: 08b-service-boundary
+                    data:
+                      - sku: laptop
+                        quantity: 5
+                      - sku: keyboard
+                        quantity: 9
+                      - sku: monitor
+                        quantity: 4
+
+  /cases/09-queue-worker/setup:
+    post:
+      tags: [Distributed Systems]
+      summary: Setup async jobs table
+      operationId: setupCase09
+      responses:
+        "200":
+          description: Queue table ready
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                success:
+                  value:
+                    case: 09-queue-worker
+                    message: async_jobs table ready
+        "500":
+          description: Setup failure
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                setupFailed:
+                  value:
+                    error: Setup failed
+
+  /cases/09-queue-worker/enqueue:
+    post:
+      tags: [Distributed Systems]
+      summary: Enqueue a job for worker processing
+      operationId: enqueueCase09Job
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QueueEnqueueRequest"
+            examples:
+              enqueue:
+                value:
+                  type: send-email
+                  payload:
+                    to: candidate@example.com
+                  maxAttempts: 3
+      responses:
+        "201":
+          description: Job enqueued
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                created:
+                  value:
+                    case: 09-queue-worker
+                    job:
+                      id: 9f6ac3b9-11c6-4e9a-ad95-2a2cf06dfad0
+                      type: send-email
+                      payload:
+                        to: candidate@example.com
+                      attempts: 0
+                      maxAttempts: 3
+                      status: pending
+                      lastError: null
+                      availableAt: 2026-04-11T09:26:10.000Z
+                      createdAt: 2026-04-11T09:26:10.000Z
+                      processedAt: null
+        "500":
+          description: Enqueue failure
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                enqueueFailed:
+                  value:
+                    error: Enqueue failed
+
+  /cases/09-queue-worker/process:
+    post:
+      tags: [Distributed Systems]
+      summary: Process the next pending job
+      operationId: processCase09Job
+      responses:
+        "200":
+          description: Processing result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                processed:
+                  value:
+                    case: 09-queue-worker
+                    processed:
+                      id: 9f6ac3b9-11c6-4e9a-ad95-2a2cf06dfad0
+                      type: send-email
+                      payload:
+                        to: candidate@example.com
+                      attempts: 1
+                      maxAttempts: 3
+                      status: completed
+                      lastError: null
+                      availableAt: 2026-04-11T09:26:10.000Z
+                      createdAt: 2026-04-11T09:26:10.000Z
+                      processedAt: 2026-04-11T09:26:11.100Z
+                empty:
+                  value:
+                    case: 09-queue-worker
+                    message: No pending jobs
+        "500":
+          description: Processing failure
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                processFailed:
+                  value:
+                    error: Process failed
+
+  /cases/09-queue-worker/stats:
+    get:
+      tags: [Distributed Systems]
+      summary: Read pending/processing/completed/dead-letter buckets
+      operationId: getCase09Stats
+      responses:
+        "200":
+          description: Queue state buckets
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                success:
+                  value:
+                    case: 09-queue-worker
+                    pending: []
+                    processing: []
+                    completed:
+                      - id: 9f6ac3b9-11c6-4e9a-ad95-2a2cf06dfad0
+                        type: send-email
+                        payload:
+                          to: candidate@example.com
+                        attempts: 1
+                        maxAttempts: 3
+                        status: completed
+                        lastError: null
+                        availableAt: 2026-04-11T09:26:10.000Z
+                        createdAt: 2026-04-11T09:26:10.000Z
+                        processedAt: 2026-04-11T09:26:11.100Z
+                    deadLetter: []
+        "500":
+          description: Stats query failure
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                statsFailed:
+                  value:
+                    error: Stats query failed
+
+  /cases/09b-idempotency/payment:
+    post:
+      tags: [Distributed Systems]
+      summary: Execute idempotent payment endpoint
+      operationId: createCase09bPayment
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IdempotentPaymentRequest"
+            examples:
+              payment:
+                value:
+                  amount: 120
+                  currency: USD
+      responses:
+        "201":
+          description: First-time payment processed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                processed:
+                  value:
+                    case: 09b-idempotency
+                    requestKey: order-123
+                    amount: 120
+                    currency: USD
+                    status: processed
+                    processedAt: 2026-04-11T09:28:10.100Z
+        "200":
+          description: Duplicate request with same idempotency key
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                duplicate:
+                  value:
+                    case: 09b-idempotency
+                    requestKey: order-123
+                    amount: 120
+                    currency: USD
+                    status: duplicate
+                    processedAt: 2026-04-11T09:28:10.100Z
+        "400":
+          description: Missing idempotency key or invalid payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                missingKey:
+                  value:
+                    error: Missing idempotency-key header
+                invalidAmount:
+                  value:
+                    error: amount must be greater than 0
+
+  /cases/09b-idempotency/store:
+    get:
+      tags: [Distributed Systems]
+      summary: Inspect in-memory idempotency key store
+      operationId: getCase09bStore
+      responses:
+        "200":
+          description: Current deduplication store
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                success:
+                  value:
+                    case: 09b-idempotency
+                    count: 1
+                    data:
+                      - requestKey: order-123
+                        amount: 120
+                        currency: USD
+                        status: processed
+                        processedAt: 2026-04-11T09:28:10.100Z
+
+  /cases/10-react-demo:
+    get:
+      tags: [Product and Observability]
+      summary: Render React mission-control demo page
+      operationId: getCase10ReactDemo
+      responses:
+        "200":
+          description: HTML page
+          content:
+            text/html:
+              schema:
+                type: string
+              examples:
+                page:
+                  value: "<!doctype html><html>...React Mission Control...</html>"
+
+  /cases/11-ai-ml/summarize:
+    post:
+      tags: [Product and Observability]
+      summary: Summarize text using provider or local fallback
+      operationId: summarizeCase11Text
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SummarizeRequest"
+            examples:
+              summarize:
+                value:
+                  text: Modern backend systems need resilient integrations, clear observability, and predictable fallback strategies when providers become unavailable.
+      responses:
+        "200":
+          description: Summary generated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                localFallback:
+                  value:
+                    case: 11-ai-ml
+                    provider: local-fallback
+                    summary: Modern backend systems need resilient integrations, clear observability, and predictable fallback strategies when providers become unavailable.
+        "400":
+          description: Validation failure
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                tooShort:
+                  value:
+                    error:
+                      fieldErrors:
+                        text:
+                          - String must contain at least 20 character(s)
+                      formErrors: []
+        "502":
+          description: Provider failure with fallback response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                providerFailure:
+                  value:
+                    case: 11-ai-ml
+                    error: AI provider call failed
+                    fallbackSummary: Modern backend systems need resilient integrations ...
+
+  /cases/12-observability:
+    get:
+      tags: [Product and Observability]
+      summary: Return observability payload and request correlation id
+      operationId: getCase12Observability
+      responses:
+        "200":
+          description: Observability payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                success:
+                  value:
+                    case: 12-observability
+                    requestId: b7dad0f0-c5a1-49bb-a905-3fd12396b66e
+                    logFormat: pretty
+
+  /cases/13-cicd-gcp:
+    get:
+      tags: [Delivery and Architecture]
+      summary: Return CI/CD and Cloud Run deployment references
+      operationId: getCase13Cicd
+      responses:
+        "200":
+          description: CI/CD reference payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                success:
+                  value:
+                    case: 13-cicd-gcp
+                    summary: CI/CD and GCP deployment study case
+                    pipelines:
+                      - system: GitHub Actions
+                        file: .github/workflows/ci.yml
+                        stages: [install, lint, test, build]
+                      - system: CircleCI
+                        file: .circleci/config.yml
+                        stages: [install, lint, test, build]
+                      - system: Google Cloud Build
+                        file: cloudbuild.yaml
+                        stages: [docker-build, docker-push, cloud-run-deploy]
+                    gcpTargets:
+                      runService: backend-developer-lab
+                      region: us-central1
+                      image: gcr.io/YOUR_PROJECT_ID/backend-developer-lab
+
+  /cases/14-system-design/scaling-checklist:
+    get:
+      tags: [Delivery and Architecture]
+      summary: Return scaling checklist
+      operationId: getCase14ScalingChecklist
+      responses:
+        "200":
+          description: Checklist items
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                success:
+                  value:
+                    case: 14-system-design
+                    checklist:
+                      - Use horizontal pod autoscaling with CPU and latency metrics
+                      - Introduce read replicas for heavy read traffic
+                      - Use Redis for hot-cache and short-lived sessions
+
+  /cases/14-system-design/architecture-template:
+    get:
+      tags: [Delivery and Architecture]
+      summary: Return architecture template
+      operationId: getCase14ArchitectureTemplate
+      responses:
+        "200":
+          description: Architecture blueprint template
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                success:
+                  value:
+                    case: 14-system-design
+                    architectureTemplate:
+                      apiGateway: Ingress + API service
+                      services:
+                        - user-service
+                        - order-service
+                        - billing-service
+                        - notification-worker
+                      dataStores:
+                        - Postgres
+                        - TimescaleDB
+                        - Redis
+                      messaging:
+                        - Pub/Sub or Kafka topic for domain events
+                      observability:
+                        - structured logs
+                        - traces
+                        - metrics dashboards
+
+  /cases/15-ci-cd-webhook/github:
+    post:
+      tags: [Delivery and Architecture]
+      summary: Verify GitHub webhook signature using raw request body
+      operationId: verifyCase15Webhook
+      parameters:
+        - $ref: "#/components/parameters/GithubSignatureHeader"
+        - $ref: "#/components/parameters/GithubEventHeader"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+            examples:
+              pushEvent:
+                value:
+                  ref: refs/heads/main
+                  repository:
+                    name: study-lab
+                  pusher:
+                    name: backend-developer
+      responses:
+        "200":
+          description: Signature verified
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                verified:
+                  value:
+                    case: 15-ci-cd-webhook
+                    verified: true
+                    event: push
+                    nextStep: Trigger CI/CD deployment workflow
+        "400":
+          description: Missing or malformed signature header
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                missingHeader:
+                  value:
+                    error: Missing x-hub-signature-256 header
+                badFormat:
+                  value:
+                    error: x-hub-signature-256 must use sha256=
+        "401":
+          description: Signature mismatch
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                mismatch:
+                  value:
+                    case: 15-ci-cd-webhook
+                    verified: false
+
+  /cases/15-ci-cd-webhook/signature/generate:
+    post:
+      tags: [Delivery and Architecture]
+      summary: Generate sha256 signature for a payload
+      operationId: generateCase15WebhookSignature
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+            examples:
+              samplePayload:
+                value:
+                  event: push
+                  repository: study-lab
+      responses:
+        "200":
+          description: Signature generation result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                success:
+                  value:
+                    case: 15-ci-cd-webhook
+                    payload: '{"event":"push","repository":"study-lab"}'
+                    signature: sha256=6f0ebf3e0a6fa7a0f83a...
+                    headerName: x-hub-signature-256
+
+  /cases/16-resilience/invoke:
+    post:
+      tags: [Reliability and Domain]
+      summary: Run dependency call with retries, timeout, circuit breaker, and bulkhead
+      operationId: invokeCase16Resilience
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResilienceInvoke"
+            examples:
+              successScenario:
+                value:
+                  dependency: payment-gateway
+                  scenario: success
+                  timeoutMs: 180
+              flakyScenario:
+                value:
+                  dependency: payment-gateway
+                  scenario: flaky
+                  timeoutMs: 180
+      responses:
+        "200":
+          description: Invocation succeeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                success:
+                  value:
+                    case: 16-resilience
+                    dependency: payment-gateway
+                    scenario: flaky
+                    attemptsUsed: 2
+                    elapsedMs: 49
+                    status: success
+                    result:
+                      dependency: payment-gateway
+                      scenario: flaky
+                      attempt: 2
+                      ok: true
+                    circuit:
+                      dependency: payment-gateway
+                      status: closed
+                      consecutiveFailures: 0
+                      openedAtMs: null
+                      inflight: 0
+                      calls: 3
+                      successes: 2
+                      failures: 1
+                      timeouts: 0
+                      rejected: 0
+                      lastError: null
+                      updatedAt: 2026-04-11T09:40:10.220Z
+                    policy:
+                      maxAttempts: 3
+                      timeoutMs: 180
+                      failureThreshold: 3
+                      openWindowMs: 8000
+                      bulkheadLimit: 4
+        "400":
+          description: Validation failure
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                validationError:
+                  value:
+                    case: 16-resilience
+                    error:
+                      fieldErrors:
+                        dependency:
+                          - String must contain at least 2 character(s)
+                      formErrors: []
+        "429":
+          description: Rejected by bulkhead concurrency limit
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                bulkheadReject:
+                  value:
+                    case: 16-resilience
+                    dependency: payment-gateway
+                    status: rejected_by_bulkhead
+                    circuit:
+                      dependency: payment-gateway
+                      inflight: 4
+                    policy:
+                      bulkheadLimit: 4
+        "502":
+          description: Failed after retries (non-timeout)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                downstreamFailure:
+                  value:
+                    case: 16-resilience
+                    dependency: payment-gateway
+                    scenario: fail
+                    attemptsUsed: 3
+                    elapsedMs: 104
+                    status: failed_after_retries
+                    error: downstream_failure
+        "503":
+          description: Rejected by open circuit breaker
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                openCircuit:
+                  value:
+                    case: 16-resilience
+                    dependency: payment-gateway
+                    status: rejected_by_circuit
+                    retryAfterMs: 5230
+        "504":
+          description: Failed after retries due to timeout
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                timeoutFailure:
+                  value:
+                    case: 16-resilience
+                    dependency: payment-gateway
+                    scenario: timeout
+                    attemptsUsed: 3
+                    elapsedMs: 603
+                    status: failed_after_retries
+                    error: request_timeout
+
+  /cases/16-resilience/state:
+    get:
+      tags: [Reliability and Domain]
+      summary: Get resilience policy and in-memory circuit states
+      operationId: getCase16State
+      responses:
+        "200":
+          description: Current resilience state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                success:
+                  value:
+                    case: 16-resilience
+                    policy:
+                      maxAttempts: 3
+                      timeoutMs: 180
+                      failureThreshold: 3
+                      openWindowMs: 8000
+                      bulkheadLimit: 4
+                    circuits:
+                      - dependency: payment-gateway
+                        status: closed
+                        consecutiveFailures: 0
+                        openedAtMs: null
+                        inflight: 0
+                        calls: 5
+                        successes: 3
+                        failures: 2
+                        timeouts: 1
+                        rejected: 1
+                        lastError: null
+                        updatedAt: 2026-04-11T09:41:00.000Z
+
+  /cases/16-resilience/reset:
+    post:
+      tags: [Reliability and Domain]
+      summary: Clear all resilience state
+      operationId: resetCase16State
+      responses:
+        "200":
+          description: State reset confirmation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                reset:
+                  value:
+                    case: 16-resilience
+                    status: reset
+                    message: Circuit and metrics state cleared
+
+  /cases/17-event-sourcing-cqrs/accounts:
+    post:
+      tags: [Reliability and Domain]
+      summary: Open account and append first event
+      operationId: openCase17Account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OpenAccountRequest"
+            examples:
+              openAccount:
+                value:
+                  accountId: acct-test-1
+                  initialBalance: 250
+                  commandId: cmd-open-acct-test-1
+      responses:
+        "201":
+          description: Account opened
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                created:
+                  value:
+                    case: 17-event-sourcing-cqrs
+                    status: accepted
+                    event:
+                      sequence: 1
+                      accountId: acct-test-1
+                      commandId: cmd-open-acct-test-1
+                      type: account-opened
+                      amount: 250
+                      occurredAt: 2026-04-11T09:45:00.000Z
+                    projection:
+                      accountId: acct-test-1
+                      balance: 250
+                      version: 1
+                      updatedAt: 2026-04-11T09:45:00.000Z
+        "200":
+          description: Duplicate command accepted idempotently
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                duplicate:
+                  value:
+                    case: 17-event-sourcing-cqrs
+                    status: duplicate_command
+                    commandId: cmd-open-acct-test-1
+                    eventSequence: 1
+                    projection:
+                      accountId: acct-test-1
+                      balance: 250
+                      version: 1
+                      updatedAt: 2026-04-11T09:45:00.000Z
+        "400":
+          description: Validation failure
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                validationError:
+                  value:
+                    case: 17-event-sourcing-cqrs
+                    error:
+                      fieldErrors:
+                        initialBalance:
+                          - Number must be greater than or equal to 0
+                      formErrors: []
+        "409":
+          description: Account already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                alreadyExists:
+                  value:
+                    case: 17-event-sourcing-cqrs
+                    error: "account already exists: acct-test-1"
+
+  /cases/17-event-sourcing-cqrs/accounts/{accountId}/deposit:
+    post:
+      tags: [Reliability and Domain]
+      summary: Deposit funds into account
+      operationId: depositCase17Funds
+      parameters:
+        - $ref: "#/components/parameters/AccountId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AmountCommandRequest"
+            examples:
+              deposit:
+                value:
+                  amount: 40
+                  commandId: cmd-deposit-1
+      responses:
+        "201":
+          description: Deposit event accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                created:
+                  value:
+                    case: 17-event-sourcing-cqrs
+                    status: accepted
+                    event:
+                      sequence: 2
+                      accountId: acct-test-1
+                      commandId: cmd-deposit-1
+                      type: money-deposited
+                      amount: 40
+                      occurredAt: 2026-04-11T09:46:00.000Z
+                    projection:
+                      accountId: acct-test-1
+                      balance: 290
+                      version: 2
+                      updatedAt: 2026-04-11T09:46:00.000Z
+        "200":
+          description: Duplicate command accepted idempotently
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                duplicate:
+                  value:
+                    case: 17-event-sourcing-cqrs
+                    status: duplicate_command
+                    commandId: cmd-deposit-1
+                    eventSequence: 2
+                    projection:
+                      accountId: acct-test-1
+                      balance: 290
+                      version: 2
+                      updatedAt: 2026-04-11T09:46:00.000Z
+        "400":
+          description: Validation failure
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                invalidAmount:
+                  value:
+                    case: 17-event-sourcing-cqrs
+                    error:
+                      fieldErrors:
+                        amount:
+                          - Number must be greater than 0
+                      formErrors: []
+        "404":
+          description: Account not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                notFound:
+                  value:
+                    case: 17-event-sourcing-cqrs
+                    error: "account not found: acct-missing"
+
+  /cases/17-event-sourcing-cqrs/accounts/{accountId}/withdraw:
+    post:
+      tags: [Reliability and Domain]
+      summary: Withdraw funds from account
+      operationId: withdrawCase17Funds
+      parameters:
+        - $ref: "#/components/parameters/AccountId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AmountCommandRequest"
+            examples:
+              withdraw:
+                value:
+                  amount: 35
+                  commandId: cmd-withdraw-1
+      responses:
+        "201":
+          description: Withdrawal event accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                created:
+                  value:
+                    case: 17-event-sourcing-cqrs
+                    status: accepted
+                    event:
+                      sequence: 3
+                      accountId: acct-test-1
+                      commandId: cmd-withdraw-1
+                      type: money-withdrawn
+                      amount: 35
+                      occurredAt: 2026-04-11T09:47:00.000Z
+                    projection:
+                      accountId: acct-test-1
+                      balance: 255
+                      version: 3
+                      updatedAt: 2026-04-11T09:47:00.000Z
+        "200":
+          description: Duplicate command accepted idempotently
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                duplicate:
+                  value:
+                    case: 17-event-sourcing-cqrs
+                    status: duplicate_command
+                    commandId: cmd-withdraw-1
+                    eventSequence: 3
+                    projection:
+                      accountId: acct-test-1
+                      balance: 255
+                      version: 3
+                      updatedAt: 2026-04-11T09:47:00.000Z
+        "400":
+          description: Validation failure
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                invalidAmount:
+                  value:
+                    case: 17-event-sourcing-cqrs
+                    error:
+                      fieldErrors:
+                        amount:
+                          - Number must be greater than 0
+                      formErrors: []
+        "404":
+          description: Account not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                notFound:
+                  value:
+                    case: 17-event-sourcing-cqrs
+                    error: "account not found: acct-missing"
+        "409":
+          description: Insufficient account balance
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                insufficient:
+                  value:
+                    case: 17-event-sourcing-cqrs
+                    error: insufficient balance
+                    projection:
+                      accountId: acct-test-1
+                      balance: 10
+                      version: 6
+                      updatedAt: 2026-04-11T09:48:00.000Z
+
+  /cases/17-event-sourcing-cqrs/accounts/{accountId}:
+    get:
+      tags: [Reliability and Domain]
+      summary: Query account projection
+      operationId: getCase17Account
+      parameters:
+        - $ref: "#/components/parameters/AccountId"
+      responses:
+        "200":
+          description: Account projection and event count
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                success:
+                  value:
+                    case: 17-event-sourcing-cqrs
+                    projection:
+                      accountId: acct-test-1
+                      balance: 255
+                      version: 3
+                      updatedAt: 2026-04-11T09:47:00.000Z
+                    totalEvents: 3
+        "404":
+          description: Account not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                notFound:
+                  value:
+                    case: 17-event-sourcing-cqrs
+                    error: "account not found: acct-missing"
+
+  /cases/17-event-sourcing-cqrs/events:
+    get:
+      tags: [Reliability and Domain]
+      summary: Query all events or filter by accountId
+      operationId: listCase17Events
+      parameters:
+        - in: query
+          name: accountId
+          required: false
+          schema:
+            type: string
+          description: Optional projection filter
+          example: acct-test-1
+      responses:
+        "200":
+          description: Event stream snapshot
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                success:
+                  value:
+                    case: 17-event-sourcing-cqrs
+                    count: 3
+                    data:
+                      - sequence: 1
+                        accountId: acct-test-1
+                        commandId: cmd-open-acct-test-1
+                        type: account-opened
+                        amount: 250
+                        occurredAt: 2026-04-11T09:45:00.000Z
+                      - sequence: 2
+                        accountId: acct-test-1
+                        commandId: cmd-deposit-1
+                        type: money-deposited
+                        amount: 40
+                        occurredAt: 2026-04-11T09:46:00.000Z
+                      - sequence: 3
+                        accountId: acct-test-1
+                        commandId: cmd-withdraw-1
+                        type: money-withdrawn
+                        amount: 35
+                        occurredAt: 2026-04-11T09:47:00.000Z
+
+  /cases/17-event-sourcing-cqrs/rebuild-projections:
+    post:
+      tags: [Reliability and Domain]
+      summary: Rebuild read-model projections from event store
+      operationId: rebuildCase17Projections
+      responses:
+        "200":
+          description: Rebuild completed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                rebuilt:
+                  value:
+                    case: 17-event-sourcing-cqrs
+                    status: rebuilt
+                    accounts: 1
+                    events: 3
+
+  /cases/17-event-sourcing-cqrs/reset:
+    post:
+      tags: [Reliability and Domain]
+      summary: Clear event store, projections, and command registry
+      operationId: resetCase17
+      responses:
+        "200":
+          description: Reset confirmation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericObject"
+              examples:
+                reset:
+                  value:
+                    case: 17-event-sourcing-cqrs
+                    status: reset
+                    message: Event store, command registry, and projections cleared
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    TaskId:
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+      description: Task identifier
+      example: 1d7b50aa-335a-42bf-bfba-af6c6a3f5ebd
+    AccountId:
+      in: path
+      name: accountId
+      required: true
+      schema:
+        type: string
+      description: Account identifier
+      example: acct-test-1
+    IdempotencyKey:
+      in: header
+      name: idempotency-key
+      required: true
+      schema:
+        type: string
+      description: Unique key for deduplicating payment requests
+      example: order-123
+    GithubSignatureHeader:
+      in: header
+      name: x-hub-signature-256
+      required: true
+      schema:
+        type: string
+      description: GitHub HMAC digest in the format sha256=<hex>
+      example: sha256=6f0ebf3e0a6fa7a0f83a4b91f410f7f5952b0b08356f3b7ec00f2ce39131b615
+    GithubEventHeader:
+      in: header
+      name: x-github-event
+      required: false
+      schema:
+        type: string
+      description: GitHub event type
+      example: push
+
+  schemas:
+    GenericObject:
+      type: object
+      additionalProperties: true
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          oneOf:
+            - type: string
+            - type: object
+              additionalProperties: true
+      required: [error]
+
+    StudyCase:
+      type: object
+      properties:
+        id:
+          type: string
+        route:
+          type: string
+        title:
+          type: string
+        focus:
+          type: string
+      required: [id, route, title, focus]
+
+    TaskCreate:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 3
+        description:
+          type: string
+        status:
+          type: string
+          enum: [todo, in_progress, done]
+          default: todo
+      required: [title]
+
+    TaskUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 3
+        description:
+          type: string
+        status:
+          type: string
+          enum: [todo, in_progress, done]
+      minProperties: 1
+
+    GraphqlRequest:
+      type: object
+      properties:
+        query:
+          type: string
+        variables:
+          type: object
+          additionalProperties: true
+      required: [query]
+
+    CreateUserRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+          minLength: 2
+      required: [email, name]
+
+    TransferRequest:
+      type: object
+      properties:
+        fromOwner:
+          type: string
+        toOwner:
+          type: string
+        amount:
+          type: number
+          exclusiveMinimum: 0
+      required: [fromOwner, toOwner, amount]
+
+    MetricIngestRequest:
+      type: object
+      properties:
+        service:
+          type: string
+          minLength: 2
+        value:
+          type: number
+      required: [service, value]
+
+    AuthLogin:
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 2
+        role:
+          type: string
+          enum: [admin, developer, viewer]
+          default: developer
+      required: [username]
+
+    CheckoutRequest:
+      type: object
+      properties:
+        sku:
+          type: string
+        quantity:
+          type: integer
+          minimum: 1
+        amount:
+          type: number
+          exclusiveMinimum: 0
+      required: [sku, quantity, amount]
+
+    QueueEnqueueRequest:
+      type: object
+      properties:
+        type:
+          type: string
+        payload:
+          type: object
+          additionalProperties: true
+        maxAttempts:
+          type: integer
+          minimum: 1
+          default: 3
+      required: [type]
+
+    IdempotentPaymentRequest:
+      type: object
+      properties:
+        amount:
+          type: number
+          exclusiveMinimum: 0
+        currency:
+          type: string
+          default: USD
+      required: [amount]
+
+    SummarizeRequest:
+      type: object
+      properties:
+        text:
+          type: string
+          minLength: 20
+      required: [text]
+
+    ResilienceInvoke:
+      type: object
+      properties:
+        dependency:
+          type: string
+          minLength: 2
+          maxLength: 64
+          default: payment-gateway
+        scenario:
+          type: string
+          enum: [success, fail, timeout, flaky]
+          default: success
+        timeoutMs:
+          type: integer
+          minimum: 60
+          maximum: 3000
+      required: [dependency]
+
+    OpenAccountRequest:
+      type: object
+      properties:
+        accountId:
+          type: string
+        initialBalance:
+          type: number
+          minimum: 0
+          maximum: 1000000
+        commandId:
+          type: string
+      required: [initialBalance]
+
+    AmountCommandRequest:
+      type: object
+      properties:
+        amount:
+          type: number
+          exclusiveMinimum: 0
+          maximum: 1000000
+        commandId:
+          type: string
+      required: [amount]

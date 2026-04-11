@@ -1,0 +1,12 @@
+- name: default
+  kind: postgres
+  configuration:
+    connection_info:
+      database_url:
+        from_env: HASURA_GRAPHQL_DATABASE_URL
+      isolation_level: read-committed
+      use_prepared_statements: true
+      pool_settings:
+        retries: 1
+        idle_timeout: 180
+        max_connections: 50
